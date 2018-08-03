@@ -61,7 +61,7 @@ def polygon_area(points):
         b = points[i]
         area += a@b
 
-    return fabs(area)*0.5
+    return area*0.5
 
 
 # Convex polygon intersection area
@@ -151,7 +151,7 @@ def NPIA(pa, pb):
             
             res += CPIA(sa,sb)
 
-    return res
+    return fabs(res)
 
 
 if __name__ == '__main__':
