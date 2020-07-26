@@ -119,6 +119,9 @@ def CPIA(pa, pb):
     #     print('x,y ',(_.x,_.y))
     # print("============================")
     
+    if len(ps) == 0:
+        return 0
+    
     tmp = ps[0]
 
     res = []
