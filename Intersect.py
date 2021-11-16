@@ -47,9 +47,9 @@ def cross_point(a1,a2,b1,b2):
         beta = (x2_x2*y1y2 - y2_y2*x1x2)/(y1_y2_*x1x2 - x1_x2_*y1y2)
     
     if x1x2 == 0:
-        alpha = (y2_y2+y1_y2_*beta)/y1y2
+        alpha = (y2_y2+y1_y2_*beta)/(y1y2+EPS)
     else:
-        alpha = (x2_x2+x1_x2_*beta)/x1x2
+        alpha = (x2_x2+x1_x2_*beta)/(x1x2+EPS)
     
     return alpha,beta,alpha*a1+(1-alpha)*a2
 
@@ -66,19 +66,28 @@ def polygon_area(points):
 
 # Convex polygon intersection area
 def CPIA(pa, pb):
+    sa = polygon_area(pa)
+    sb = polygon_area(pb)
+    print('sa sb',sa,sb)
+    if sa * sb < 0:
+        sign = -1
+    else:
+        sign = 1
     na = len(pa)
     nb = len(pb)
     ps = [] # point set
     for i in range(na):
         a1 = pa[i-1]
         a2 = pa[i]
-        flag = True
+        flag = False
+        sum_s = 0
         for j in range(nb):
             b1 = pb[j-1]
             b2 = pb[j]
-            if (b2-b1)@(a1-b1) > EPS:
-                flag = False
-                break
+            sum_s += fabs(polygon_area([a1,b1,b2]))
+            
+        if fabs(fabs(sum_s) - fabs(sb)) < EPS:
+            flag = True
 
         if flag:
             ps.append(a1)
@@ -92,15 +101,16 @@ def CPIA(pa, pb):
     for i in range(nb):
         a1 = pb[i-1]
         a2 = pb[i]
-        flag = True
+        flag = False
+        sum_s = 0
         # print('a1',(a1.x,a1.y))
         for j in range(na):
             b1 = pa[j-1]
             b2 = pa[j]
+            sum_s += fabs(polygon_area([a1,b1,b2]))
             # print('b1',(b1.x,b1.y),'b2',(b2.x,b2.y),(a1-b1)@(b2-b1))
-            if (b2-b1)@(a1-b1) > EPS:
-                flag = False
-                break
+        if fabs(fabs(sum_s) - fabs(sa)) < EPS:
+            flag = True
         if flag:
             ps.append(a1)
     
@@ -115,9 +125,9 @@ def CPIA(pa, pb):
     
     ps = sorted(ps,key=lambda x:(x.x+EPS*x.y))
     ps = unique(ps)
-    # for _ in ps:
-    #     print('x,y ',(_.x,_.y))
-    # print("============================")
+    for _ in ps:
+        print('x,y ',(_.x,_.y))
+    print("============================")
     
     if len(ps) == 0:
         return 0
@@ -131,10 +141,11 @@ def CPIA(pa, pb):
     for _ in ps:
         res.append(_)
     
+    
     # for _ in res:
     #     print('x,y',(_.x,_.y))
 
-    return polygon_area(res)
+    return polygon_area(res) * sign
 
 # Normal polygon intersection area
 def NPIA(pa, pb):
@@ -151,8 +162,9 @@ def NPIA(pa, pb):
             sb.append(pb[0])
             sb.append(pb[j])
             sb.append(pb[j+1])
-            
-            res += CPIA(sa,sb)
+            tmp = CPIA(sa,sb)
+            print(i,j,tmp)
+            res += tmp
 
     return fabs(res)
 
